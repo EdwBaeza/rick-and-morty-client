@@ -19,7 +19,6 @@ func main() {
 	fmt.Println(character.Status)
 
 	// Example FindAll Characters
-	fmt.Println("==================================================================")
 	fmt.Println("FindAll Characters:")
 	characterPages, _ := characterService.FindAll()
 	fmt.Println(reflect.TypeOf(characterPages))
