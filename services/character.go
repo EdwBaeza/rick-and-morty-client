@@ -14,7 +14,7 @@ type Character struct {
 	http
 }
 
-// FindByID return single character
+// FindByID returns single character
 func (c *Character) FindByID(id int) (models.Character, error) {
 	character := models.Character{}
 	response, err := c.http.client.R().EnableTrace().Get(c.http.FullPathWithID(id))
@@ -29,7 +29,7 @@ func (c *Character) FindByID(id int) (models.Character, error) {
 	return character, nil
 }
 
-// FindAll return all character
+// FindAll returns all characters by paging API
 func (c *Character) FindAll() ([]models.CharacterPage, error) {
 	var characterPages []models.CharacterPage
 
