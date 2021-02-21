@@ -15,11 +15,12 @@ type http struct {
 	client       *resty.Client
 }
 
-//FullPath return full url for API
+//FullPath function return full url for API
 func (s *http) FullPath() string {
 	return BASEURL + s.relativePath
 }
 
+//FullPathWithID function return full url with path param for API
 func (s *http) FullPathWithID(id int) string {
 	return s.FullPath() + "/" + strconv.Itoa(id)
 }
