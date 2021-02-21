@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-
+	// Example FindByID Character
 	characterService := services.NewCharacterService()
 	character, _ := characterService.FindByID(1)
 	fmt.Println("FindByID Character:")
@@ -27,5 +27,4 @@ func main() {
 	fmt.Println("Page 2:", characterPages[1])
 	fmt.Println("Pages:", len(characterPages))
 	fmt.Println("Select Character 1 from page 1:", characterPages[0].Characters[0])
-
 }
