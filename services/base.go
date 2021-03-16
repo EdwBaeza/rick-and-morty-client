@@ -1,15 +1,14 @@
 package services
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/go-resty/resty/v2"
 )
 
-//BASEURL API
 const BASEURL = "https://rickandmortyapi.com/api/"
 
-//HttpClient for API
 type http struct {
 	relativePath string
 	client       *resty.Client
@@ -23,4 +22,20 @@ func (s *http) FullPath() string {
 //FullPathWithID function return full url with path param for API
 func (s *http) FullPathWithID(id int) string {
 	return s.FullPath() + "/" + strconv.Itoa(id)
+}
+
+func (s *http) GenerateQueryParams(params map[string]string) string {
+	var fullQueryParams string
+
+	for key, value := range params {
+		format := "&%s=%s"
+
+		if fullQueryParams == "" {
+			format = "%s=%s"
+		}
+
+		fullQueryParams += fmt.Sprintf(format, key, value)
+	}
+
+	return fullQueryParams
 }

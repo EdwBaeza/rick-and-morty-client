@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/edwbaeza/rick-and-morty-client/models"
 	"github.com/go-resty/resty/v2"
 )
 
-// Location wrap for api
 type Location struct {
 	http
 }
@@ -26,7 +26,7 @@ func (loc *Location) FindByID(id int) (models.Location, error) {
 		return location, err
 	}
 
-	log.Println(fmt.Sprintf("Success Response Location FindByID: %d", id))
+	log.Println(fmt.Sprintf("Success Response FindByID Location: %d", id))
 	json.Unmarshal(response.Body(), &location)
 	return location, nil
 }
@@ -50,7 +50,43 @@ func (loc *Location) FindAll() ([]models.LocationPage, error) {
 		json.Unmarshal(response.Body(), &locationPage)
 		locationPages = append(locationPages, locationPage)
 
-		log.Println(fmt.Sprintf("Success Response Location FindAll Page: %d", i))
+		log.Println(fmt.Sprintf("Success Response FindAll Location Page: %d", i))
+
+		if locationPage.Info.Next == "" {
+			log.Println("Pagination finished")
+			break
+		}
+	}
+
+	return locationPages, nil
+}
+
+// Filter locations by following keys
+// name: filter by the given name.
+// type: filter by the given type.
+// dimension: filter by the given dimension.
+func (loc *Location) Filter(queryParams map[string]string) ([]models.LocationPage, error) {
+	locationPages := []models.LocationPage{}
+	url := loc.http.FullPath()
+
+	for i := 1; ; i++ {
+		locationPage := models.LocationPage{}
+		queryParams["page"] = strconv.Itoa(i)
+
+		response, err := loc.http.client.R().
+			SetQueryString(loc.http.GenerateQueryParams(queryParams)).
+			EnableTrace().
+			Get(url)
+
+		if err != nil {
+			log.Fatalln(fmt.Sprintf("Filter at page %d, error: %s", i, err))
+			return locationPages, err
+		}
+
+		json.Unmarshal(response.Body(), &locationPage)
+		locationPages = append(locationPages, locationPage)
+
+		log.Println(fmt.Sprintf("Success Response Filter Location Page: %d", i))
 
 		if locationPage.Info.Next == "" {
 			log.Println("Pagination finished")
