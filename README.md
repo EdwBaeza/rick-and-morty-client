@@ -17,7 +17,7 @@
 	fmt.Println(reflect.TypeOf(characterPages))
 	fmt.Println("Page 1:", characterPages[0])
 	fmt.Println("Pages:", len(characterPages))
-	fmt.Println("Select location 1 from page 1:", characterPages[0].Characters[0])
+	fmt.Println("Select character 1 from page 1:", characterPages[0].Characters[0])
 
 	// Example Filter Characters
 	// Available keys
@@ -42,7 +42,7 @@
 	// Example FindByID Location
 	locationService := services.NewLocationService()
 	location, _ := locationService.FindByID(1)
-	fmt.Println("FindByID Character:")
+	fmt.Println("FindByID Location:")
 	fmt.Println(reflect.TypeOf(location))
 	fmt.Println(location)
 	fmt.Println(location.ID)
