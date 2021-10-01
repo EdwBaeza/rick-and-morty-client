@@ -75,3 +75,8 @@
 	fmt.Println("Select location 1 from page 1:", filteredLocationPages[0].Locations[0])
 
 ```
+
+### Tests
+```bash
+rick-and-morty-client$ go test -v ./...
+```
