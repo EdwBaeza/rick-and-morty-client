@@ -56,7 +56,7 @@
 	fmt.Println("Pages:", len(locationPages))
 	fmt.Println("Select location 1 from page 1:", locationPages[0].Locations[0])
 
-	// Example Filter Characters
+	// Example Filter Locations
 	// Available keys
 	// name: filter by the given name.
 	// type: filter by the given type.

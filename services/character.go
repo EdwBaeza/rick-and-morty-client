@@ -6,7 +6,7 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/edwbaeza/rick-and-morty-client/models"
+	"github.com/edwbaeza/rick-and-morty-client/structs"
 	"github.com/go-resty/resty/v2"
 )
 
@@ -15,46 +15,42 @@ type Character struct {
 }
 
 // FindByID returns single character
-func (c *Character) FindByID(id int) (models.Character, error) {
-	character := models.Character{}
-	response, err := c.http.client.R().EnableTrace().Get(c.http.FullPathWithID(id))
+func (loc *Character) FindByID(id int) (structs.Character, error) {
+	character := structs.Character{}
+	pathParams := map[string]string{"id": strconv.Itoa(id)}
+	queryParams := map[string]string{}
+	response, err := loc.get(loc.resource+"/{id}", pathParams, queryParams)
 
 	if err != nil {
 		log.Fatalln(fmt.Sprintf("FindByID %d, Error %s", id, err))
 		return character, err
 	}
 
-	log.Println(fmt.Sprintf("Success Response FindByID Character : %d", id))
-	json.Unmarshal(response.Body(), &character)
+	log.Println(fmt.Sprintf("Success Response FindByID Location: %d", id))
+	json.Unmarshal(response, &character)
 	return character, nil
 }
 
 // FindAll returns all characters by paging API
-func (c *Character) FindAll() ([]models.CharacterPage, error) {
-	characterPages := []models.CharacterPage{}
-	url := c.http.FullPath()
+func (loc *Character) FindAll() ([]structs.CharacterPage, error) {
+	var characterPages []structs.CharacterPage
+	pathParams := map[string]string{}
+	queryParams := map[string]string{}
 
 	for i := 1; ; i++ {
-		characterPage := models.CharacterPage{}
-		queryParams := map[string]string{"page": strconv.Itoa(i)}
-
-		response, err := c.http.client.R().
-			SetQueryString(c.http.GenerateQueryParams(queryParams)).
-			EnableTrace().
-			Get(url)
+		characterPage := structs.CharacterPage{}
+		queryParams["page"] = strconv.Itoa(i)
+		response, err := loc.get(loc.resource, pathParams, queryParams)
 
 		if err != nil {
 			log.Fatalln(fmt.Sprintf("FindAll at page %d, error: %s", i, err))
 			return characterPages, err
 		}
 
-		json.Unmarshal(response.Body(), &characterPage)
+		json.Unmarshal(response, &characterPage)
 		characterPages = append(characterPages, characterPage)
 
-		log.Println(fmt.Sprintf("Success Response FindAll Character Page: %d", i))
-
 		if characterPage.Info.Next == "" {
-			log.Println("Pagination finished")
 			break
 		}
 	}
@@ -68,28 +64,25 @@ func (c *Character) FindAll() ([]models.CharacterPage, error) {
 // species: filter by the given species.
 // type: filter by the given type.
 // gender: filter by the given gender (female, male, genderless or unknown).
-func (c *Character) Filter(queryParams map[string]string) ([]models.CharacterPage, error) {
-	characterPages := []models.CharacterPage{}
-	url := c.http.FullPath()
+// func (c *Character) Filter(queryParams map[string]string) ([]structs.Character, error) {
+func (loc *Character) Filter(params map[string]string) ([]structs.CharacterPage, error) {
+	characterPages := []structs.CharacterPage{}
+	pathParams := map[string]string{}
 
 	for i := 1; ; i++ {
-		characterPage := models.CharacterPage{}
-		queryParams["page"] = strconv.Itoa(i)
-
-		response, err := c.http.client.R().
-			SetQueryString(c.http.GenerateQueryParams(queryParams)).
-			EnableTrace().
-			Get(url)
+		characterPage := structs.CharacterPage{}
+		params["page"] = strconv.Itoa(i)
+		response, err := loc.get(loc.resource, pathParams, params)
 
 		if err != nil {
 			log.Fatalln(fmt.Sprintf("Filter at page %d, error: %s", i, err))
 			return characterPages, err
 		}
 
-		json.Unmarshal(response.Body(), &characterPage)
+		json.Unmarshal(response, &characterPage)
 		characterPages = append(characterPages, characterPage)
 
-		log.Println(fmt.Sprintf("Success Response Filter Character Page: %d", i))
+		log.Println(fmt.Sprintf("Success Response Filter Location Page: %d", i))
 
 		if characterPage.Info.Next == "" {
 			log.Println("Pagination finished")
@@ -104,8 +97,8 @@ func (c *Character) Filter(queryParams map[string]string) ([]models.CharacterPag
 func NewCharacterService() *Character {
 	return &Character{
 		http: http{
-			relativePath: "character",
-			client:       resty.New(),
+			resource: "character",
+			client:   resty.New(),
 		},
 	}
 }

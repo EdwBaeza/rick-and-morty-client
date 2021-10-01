@@ -49,7 +49,7 @@ func main() {
 	// Example FindByID Location
 	locationService := services.NewLocationService()
 	location, _ := locationService.FindByID(1)
-	fmt.Println("FindByID Character:")
+	fmt.Println("FindByID Location:")
 	fmt.Println(reflect.TypeOf(location))
 	fmt.Println(location)
 	fmt.Println(location.ID)
@@ -63,7 +63,7 @@ func main() {
 	fmt.Println("Pages:", len(locationPages))
 	fmt.Println("Select location 1 from page 1:", locationPages[0].Locations[0])
 
-	// Example Filter Characters
+	// Example Filter Locations
 	// Available keys
 	// name: filter by the given name.
 	// type: filter by the given type.

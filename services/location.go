@@ -6,7 +6,7 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/edwbaeza/rick-and-morty-client/models"
+	"github.com/edwbaeza/rick-and-morty-client/structs"
 	"github.com/go-resty/resty/v2"
 )
 
@@ -15,11 +15,11 @@ type Location struct {
 }
 
 // FindByID returns single Location
-func (loc *Location) FindByID(id int) (models.Location, error) {
-	location := models.Location{}
-	response, err := loc.http.client.R().
-		EnableTrace().
-		Get(loc.http.FullPathWithID(id))
+func (loc *Location) FindByID(id int) (structs.Location, error) {
+	location := structs.Location{}
+	pathParams := map[string]string{"id": strconv.Itoa(id)}
+	queryParams := map[string]string{}
+	response, err := loc.get(loc.resource+"/{id}", pathParams, queryParams)
 
 	if err != nil {
 		log.Fatalln(fmt.Sprintf("FindByID %d, Error %s", id, err))
@@ -27,33 +27,30 @@ func (loc *Location) FindByID(id int) (models.Location, error) {
 	}
 
 	log.Println(fmt.Sprintf("Success Response FindByID Location: %d", id))
-	json.Unmarshal(response.Body(), &location)
+	json.Unmarshal(response, &location)
 	return location, nil
 }
 
 // FindAll returns all locations by paging API
-func (loc *Location) FindAll() ([]models.LocationPage, error) {
-	var locationPages []models.LocationPage
+func (loc *Location) FindAll() ([]structs.LocationPage, error) {
+	var locationPages []structs.LocationPage
+	pathParams := map[string]string{}
+	queryParams := map[string]string{}
 
 	for i := 1; ; i++ {
-		var locationPage = models.LocationPage{}
-		response, err := loc.http.client.R().
-			SetQueryString(fmt.Sprintf("page=%d", i)).
-			EnableTrace().
-			Get(loc.http.FullPath())
+		locationPage := structs.LocationPage{}
+		queryParams["page"] = strconv.Itoa(i)
+		response, err := loc.get(loc.resource, pathParams, queryParams)
 
 		if err != nil {
 			log.Fatalln(fmt.Sprintf("FindAll at page %d, error: %s", i, err))
 			return locationPages, err
 		}
 
-		json.Unmarshal(response.Body(), &locationPage)
+		json.Unmarshal(response, &locationPage)
 		locationPages = append(locationPages, locationPage)
 
-		log.Println(fmt.Sprintf("Success Response FindAll Location Page: %d", i))
-
 		if locationPage.Info.Next == "" {
-			log.Println("Pagination finished")
 			break
 		}
 	}
@@ -65,25 +62,21 @@ func (loc *Location) FindAll() ([]models.LocationPage, error) {
 // name: filter by the given name.
 // type: filter by the given type.
 // dimension: filter by the given dimension.
-func (loc *Location) Filter(queryParams map[string]string) ([]models.LocationPage, error) {
-	locationPages := []models.LocationPage{}
-	url := loc.http.FullPath()
+func (loc *Location) Filter(params map[string]string) ([]structs.LocationPage, error) {
+	locationPages := []structs.LocationPage{}
+	pathParams := map[string]string{}
 
 	for i := 1; ; i++ {
-		locationPage := models.LocationPage{}
-		queryParams["page"] = strconv.Itoa(i)
-
-		response, err := loc.http.client.R().
-			SetQueryString(loc.http.GenerateQueryParams(queryParams)).
-			EnableTrace().
-			Get(url)
+		locationPage := structs.LocationPage{}
+		params["page"] = strconv.Itoa(i)
+		response, err := loc.get(loc.resource, pathParams, params)
 
 		if err != nil {
 			log.Fatalln(fmt.Sprintf("Filter at page %d, error: %s", i, err))
 			return locationPages, err
 		}
 
-		json.Unmarshal(response.Body(), &locationPage)
+		json.Unmarshal(response, &locationPage)
 		locationPages = append(locationPages, locationPage)
 
 		log.Println(fmt.Sprintf("Success Response Filter Location Page: %d", i))
@@ -101,8 +94,8 @@ func (loc *Location) Filter(queryParams map[string]string) ([]models.LocationPag
 func NewLocationService() *Location {
 	return &Location{
 		http: http{
-			relativePath: "location",
-			client:       resty.New(),
+			resource: "location",
+			client:   resty.New(),
 		},
 	}
 }
