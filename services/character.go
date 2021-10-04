@@ -64,7 +64,6 @@ func (loc *Character) FindAll() ([]structs.CharacterPage, error) {
 // species: filter by the given species.
 // type: filter by the given type.
 // gender: filter by the given gender (female, male, genderless or unknown).
-// func (c *Character) Filter(queryParams map[string]string) ([]structs.Character, error) {
 func (loc *Character) Filter(params map[string]string) ([]structs.CharacterPage, error) {
 	characterPages := []structs.CharacterPage{}
 	pathParams := map[string]string{}
